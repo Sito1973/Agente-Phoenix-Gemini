@@ -55,35 +55,30 @@ class N8nAPI:
                     response.status_code, response.text)
         return response
 
-tools = [
-    {
+tools = [{
+    "function": {
         "name": "crear_pedido",
-        "description": "se crea el pedido con todos los productos elegidos por el cliente con su valor  unitario cada uno, y colocar todas las observaciones  y recomendaciones hechas por el cliente, para el valor total solo debes sumar el precio de los productos el del domicilio ya esta en el sistema",
+        "description": "se crea el pedido con todos los productos elegidos por el cliente con su valor unitario cada uno, y colocar todas las observaciones y recomendaciones hechas por el cliente",
         "parameters": {
-          "type": "OBJECT",
-          "properties": {
-            "nombre_cliente": {
-              "type": "STRING",
-              "description": "nombre suministrado por el cliente"
+            "type": "object",
+            "properties": {
+                "nombre_cliente": {
+                    "type": "string",
+                    "description": "nombre suministrado por el cliente"
+                },
+                "pedido_cliente": {
+                    "type": "string",
+                    "description": "pedido completo del cliente con recomendaciones y observaciones"
+                },
+                "valor_total": {
+                    "type": "number",
+                    "description": "valor total del pedido"
+                }
             },
-            "pedido_cliente": {
-              "type": "STRING",
-              "description": "pedido completo del cliente con recomendaciones y observaciones"
-            },
-            "valor_total": {
-              "type": "NUMBER",
-              "description": "valor total del pedido"
-
-            }
-          },
-          "required": [
-            "nombre_cliente",
-            "pedido_cliente",
-            "valor_total"
-          ]
+            "required": ["nombre_cliente", "pedido_cliente", "valor_total"]
         }
-      }
-]
+    }
+}]
 
 
 system_instruction = """
