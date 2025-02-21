@@ -1,7 +1,8 @@
 import os
 import sys
+import requests
 
-import boto3
+
 from dotenv import load_dotenv
 from loguru import logger
 from datetime import datetime
@@ -24,6 +25,35 @@ load_dotenv(override=True)
 
 logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
+
+
+class N8nAPI:
+
+    def __init__(self):
+        self.crear_pedido_webhook_url = os.environ.get(
+            "N8N_CREAR_PEDIDO_WEBHOOK_URL")
+        self.link_pago_webhook_url = os.environ.get(
+            "N8N_LINK_PAGO_WEBHOOK_URL")
+        self.enviar_menu_webhook_url = os.environ.get(
+            "N8N_ENVIAR_MENU_WEBHOOK_URL")
+        self.crear_direccion_webhook_url = os.environ.get(
+            "N8N_CREAR_DIRECCION_WEBHOOK_URL")
+        self.eleccion_forma_pago_url = os.environ.get(
+            "N8N_ELECCION_FORMA_PAGO_WEBHOOK_URL")
+        self.facturacion_electronica_url = os.environ.get(
+            "N8N_FACTURACION_ELECTRONICA_WEBHOOK_URL")
+        self.pqrs_url = os.environ.get(
+            "N8N_PQRS_WEBHOOK_URL")
+        # Puedes añadir más URLs de webhook si lo necesitas
+        logger.info("Inicializado N8nAPI con las URLs")
+
+    def crear_pedido(self, payload):
+        """Envía el pedido al webhook de n8n"""
+        logger.debug("Enviando pedido a n8n con payload: %s", payload)
+        response = requests.post(self.crear_pedido_webhook_url, json=payload)
+        logger.info("Respuesta de n8n al enviar pedido: %s %s",
+                    response.status_code, response.text)
+        return response
 
 tools = [
     {
@@ -62,24 +92,52 @@ system_instruction = """
 
 """
 
+from loguru import logger
 
-def crear_pedido(
-    input: str
-)-> str:
-    """Can be used to get any payment related FAQ/ details"""
-    modelarn = "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
-    kbId = "MHUB3JNKK1"
-    answer = ""
-    answer =  bedrock_agent_client.retrieve_and_generate(
-            input={"text": input},
-            retrieveAndGenerateConfiguration={
-                "type": "KNOWLEDGE_BASE",
-                "knowledgeBaseConfiguration": {
-                    "knowledgeBaseId": kbId,
-                    "modelArn": modelarn,
-                },
-            },
-        )
+def crear_pedido(nombre_cliente: str, pedido_cliente: str, valor_total: float) -> str:
+    """
+    Envía los datos del pedido al webhook de n8n y devuelve una respuesta para el usuario.
+
+    Args:
+        nombre_cliente: Nombre suministrado por el cliente
+        pedido_cliente: Pedido completo del cliente con recomendaciones y observaciones
+        valor_total: Valor total del pedido (suma de los productos)
+    """
+    logger.info(f"Iniciando crear_pedido para {nombre_cliente} con pedido: {pedido_cliente}, total: {valor_total}")
+
+    try:
+        n8n_api = N8nAPI()
+
+        # Construir el payload para n8n
+        payload = {
+            "response": {
+                "tool_code": "crear_pedido",
+                "datos": {
+                    "nombre_cliente": nombre_cliente,
+                    "pedido_cliente": pedido_cliente,
+                    "valor_total": valor_total
+                }
+            }
+        }
+
+        logger.debug(f"Payload enviado a n8n: {payload}")
+
+        # Enviar el pedido al webhook de n8n
+        response = n8n_api.crear_pedido(payload)
+
+        # Procesar la respuesta de n8n
+        if response.status_code in [200, 201]:
+            response_content = response.json() if 'application/json' in response.headers.get('Content-Type', '') else {"message": response.text}
+            return f"Pedido creado exitosamente para {nombre_cliente}. Recibiras un mensaje por WhatsApp con las formas de pago."
+        else:
+            logger.error(f"Error al enviar pedido a n8n: {response.text}")
+            return "Lo siento, hubo un problema al crear tu pedido. Por favor intenta de nuevo."
+
+    except Exception as e:
+        logger.exception(f"Error en crear_pedido: {e}")
+        return "Ocurrio un error al procesar tu pedido. Por favor intenta mas tarde."
+
+        
     return answer["output"]["text"]
 
 async def run_bot(websocket_client, stream_sid):
@@ -97,7 +155,7 @@ async def run_bot(websocket_client, stream_sid):
 
  
     llm = GeminiMultimodalLiveLLMService(
-        api_key=os.getenv("GOOGLE_API_KEY"),
+        api_key=os.environ['GOOGLE_API_KEY'],
         system_instruction=system_instruction,
         tools=tools,
         voice_id="Aoede",                    # Voices: Aoede, Charon, Fenrir, Kore, Puck
@@ -109,7 +167,7 @@ async def run_bot(websocket_client, stream_sid):
         
     context = OpenAILLMContext(
         
-        [{"role": "user", "content": "Say hello."}],
+        [{"role": "user", "content": "Hola gracias por comunicarte a Bandidos, como te puedo colaborar?"}],
     )
     context_aggregator = llm.create_context_aggregator(context)
 

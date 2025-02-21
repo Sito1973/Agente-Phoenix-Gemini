@@ -8,3 +8,4 @@ twilio
 boto3
 pipecat
 starlette
+requests
