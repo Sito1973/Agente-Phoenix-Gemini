@@ -55,30 +55,38 @@ class N8nAPI:
                     response.status_code, response.text)
         return response
 
-tools = [{
-    "function": {
+tools =[
+  {
+    "function_declarations": [
+      {
         "name": "crear_pedido",
         "description": "se crea el pedido con todos los productos elegidos por el cliente con su valor unitario cada uno, y colocar todas las observaciones y recomendaciones hechas por el cliente",
         "parameters": {
-            "type": "object",
-            "properties": {
-                "nombre_cliente": {
-                    "type": "string",
-                    "description": "nombre suministrado por el cliente"
-                },
-                "pedido_cliente": {
-                    "type": "string",
-                    "description": "pedido completo del cliente con recomendaciones y observaciones"
-                },
-                "valor_total": {
-                    "type": "number",
-                    "description": "valor total del pedido"
-                }
+          "type": "object",
+          "properties": {
+            "nombre_cliente": {
+              "type": "string",
+              "description": "nombre suministrado por el cliente"
             },
-            "required": ["nombre_cliente", "pedido_cliente", "valor_total"]
+            "pedido_cliente": {
+              "type": "string",
+              "description": "pedido completo del cliente con recomendaciones y observaciones"
+            },
+            "valor_total": {
+              "type": "number",
+              "description": "valor total del pedido"
+            }
+          },
+          "required": [
+            "nombre_cliente",
+            "pedido_cliente",
+            "valor_total"
+          ]
         }
-    }
-}]
+      }
+    ]
+  }
+]
 
 
 system_instruction = """
@@ -87,7 +95,7 @@ system_instruction = """
 
 """
 
-from loguru import logger
+
 
 def crear_pedido(nombre_cliente: str, pedido_cliente: str, valor_total: float) -> str:
     """
@@ -133,7 +141,7 @@ def crear_pedido(nombre_cliente: str, pedido_cliente: str, valor_total: float) -
         return "Ocurrio un error al procesar tu pedido. Por favor intenta mas tarde."
 
         
-    return answer["output"]["text"]
+    
 
 async def run_bot(websocket_client, stream_sid):
     transport = FastAPIWebsocketTransport(
@@ -153,11 +161,11 @@ async def run_bot(websocket_client, stream_sid):
         api_key=os.environ['GOOGLE_API_KEY'],
         system_instruction=system_instruction,
         tools=tools,
-        voice_id="Aoede",                    # Voices: Aoede, Charon, Fenrir, Kore, Puck
+        voice_id="Puck",                    # Voices: Aoede, Charon, Fenrir, Kore, Puck
         transcribe_user_audio=True,          # Enable speech-to-text for user input
         transcribe_model_audio=True,         # Enable speech-to-text for model responses
     )
-    llm.register_function("get_payment_info", crear_pedido)
+    llm.register_function("crear_pedido", crear_pedido)
 
         
     context = OpenAILLMContext(
