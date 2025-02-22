@@ -1,10 +1,11 @@
 import json
-
+import requests
 import uvicorn
 from bot import run_bot
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse
+from fastapi import FastAPI, Request
 
 app = FastAPI()
 
@@ -17,9 +18,15 @@ app.add_middleware(
 )
 
 
-@app.post("/")
-async def start_call():
-    print("POST TwiML")
+#@app.post("/")
+#async def start_call():
+    #print("POST TwiML")
+    #return HTMLResponse(content=open("templates/streams.xml").read(), media_type="application/xml")
+
+@app.post("/") 
+async def start_call(request: Request):
+    form_data = await request.form() 
+    print("Datos de la llamada de Twilio:", form_data) 
     return HTMLResponse(content=open("templates/streams.xml").read(), media_type="application/xml")
 
 

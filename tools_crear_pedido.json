@@ -1,0 +1,30 @@
+{
+  "function_declarations": [
+    {
+      "name": "crear_pedido",
+      "description": "se crea el pedido con todos los productos elegidos por el cliente con su valor unitario cada uno, y se colocan todas las observaciones y recomendaciones hechas por el cliente",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "nombre_cliente": {
+            "type": "string",
+            "description": "nombre suministrado por el cliente"
+          },
+          "pedido_cliente": {
+            "type": "string",
+            "description": "pedido completo del cliente con recomendaciones y observaciones"
+          },
+          "valor_total": {
+            "type": "number",
+            "description": "valor total del pedido"
+          }
+        },
+        "required": [
+          "nombre_cliente",
+          "pedido_cliente",
+          "valor_total"
+        ]
+      }
+    }
+  ]
+}
