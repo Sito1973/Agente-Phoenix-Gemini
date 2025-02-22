@@ -63,8 +63,7 @@ def _crear_pedido_sync(nombre_cliente: str, pedido_cliente: str, valor_total: fl
     logger.info(f"Iniciando crear_pedido para {nombre_cliente} con pedido: {pedido_cliente}, total: {valor_total}")
     try:
         n8n_api = N8nAPI()
-        payload = {
-            "response": {
+        payload =  {
                 "tool_code": "crear_pedido",
                 "datos": {
                     "nombre_cliente": nombre_cliente,
@@ -72,7 +71,7 @@ def _crear_pedido_sync(nombre_cliente: str, pedido_cliente: str, valor_total: fl
                     "valor_total": valor_total
                 }
             }
-        }
+        
         logger.debug(f"Payload enviado a n8n: {payload}")
         response = n8n_api.crear_pedido(payload)
         if response.status_code in [200, 201]:

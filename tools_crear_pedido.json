@@ -2,7 +2,7 @@
   "function_declarations": [
     {
       "name": "crear_pedido",
-      "description": "se crea el pedido con todos los productos elegidos por el cliente con su valor unitario cada uno, y se colocan todas las observaciones y recomendaciones hechas por el cliente",
+      "description": "se crea el pedido con todos los productos elegidos por el cliente con su valor unitario cada uno, y se colocan todas las observaciones y recomendaciones hechas por el cliente, tambien se envia el telefono",
       "parameters": {
         "type": "object",
         "properties": {
@@ -17,12 +17,38 @@
           "valor_total": {
             "type": "number",
             "description": "valor total del pedido"
+          },
+          "telefono_usuario": {
+            "type": "number",
+            "description": "numero de 10 digitos del cliente"
+          },
+            "tipo_pedido": {
+            "type": "string",
+            "enum": [
+              "Recoger",
+              "Domicilio"
+            ],
+            "description": "tipo envio de pedido, recoger o domicilio"
+          },
+          "direccion_cliente": {
+            "type": "string",
+            "description": "direccion completa del cliente con calle o carrera y numero de domicilio y otra indicaciones"
+          },
+            "Ciudad_direccion": {
+            "type": "string",
+            "enum": [
+              "Pereira",
+              "Dosquebradas"
+            ],
+            "description": "la direccion de la ciudad del cliente"
           }
         },
         "required": [
           "nombre_cliente",
           "pedido_cliente",
-          "valor_total"
+          "valor_total",
+          "telefono_usuario",
+          "tipo_pedido"
         ]
       }
     }
